@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de Exercícios Matemáticos</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #ff7f50, #1e90ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: white;
+    }
+
+    .container {
+      background-color: white;
+      border-radius: 15px;
+      padding: 40px;
+      width: 90%;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      color: black;
+    }
+
+    h1 {
+      color: #ff6347;
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    .button {
+      background-color: #ff6347;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      margin-top: 20px;
+    }
+
+    .button:hover {
+      background-color: #e5533e;
+    }
+
+    .exercicio {
+      background-color: #f0f0f0;
+      padding: 15px;
+      font-size: 22px;
+      margin: 20px 0;
+      border-radius: 10px;
+      color: #333;
+    }
+
+    .resposta {
+      display: none;
+      margin-top: 10px;
+      font-size: 20px;
+      font-weight: bold;
+      color: green;
+    }
+
+    .revelar-resposta {
+      margin-top: 10px;
+      cursor: pointer;
+      color: #ff6347;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .countdown {
+      font-size: 18px;
+      color: #ff6347;
+      font-weight: bold;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Exercícios Matemáticos</h1>
+    <p>Escolha se quer usar contagem regressiva para ver a resposta:</p>
+    <label><input type="checkbox" id="usarContagem" checked> Usar contagem regressiva (10s)</label>
+    <button class="button" onclick="gerarExercicios()">Gerar Exercícios</button>
+    <div class="exercicios-container" id="exercicios"></div>
+  </div>
+
+  <script>
+    function gerarExercicio() {
+      const opcoes = ['+', '-', '*', '/', '**', 'sqrt'];
+      const numero1 = Math.floor(Math.random() * 10) + 1;
+      const numero2 = Math.floor(Math.random() * 10) + 1;
+      const operador = opcoes[Math.floor(Math.random() * opcoes.length)];
+
+      let exercicio, resposta;
+
+      if (operador === 'sqrt') {
+        exercicio = `√${numero1 ** 2}`;
+        resposta = numero1;
+      } else if (operador === '**') {
+        exercicio = `${numero1}²`;
+        resposta = numero1 ** 2;
+      } else {
+        exercicio = `${numero1} ${operador} ${numero2}`;
+        switch (operador) {
+          case '+': resposta = numero1 + numero2; break;
+          case '-': resposta = numero1 - numero2; break;
+          case '*': resposta = numero1 * numero2; break;
+          case '/': resposta = (numero1 / numero2).toFixed(2); break;
+        }
+      }
+
+      return { exercicio, resposta };
+    }
+
+    function gerarExercicios() {
+      const usarContagem = document.getElementById('usarContagem').checked;
+      const numeroDeExercicios = Math.floor(Math.random() * 5) + 5;
+      let html = '';
+
+      for (let i = 0; i < numeroDeExercicios; i++) {
+        const { exercicio, resposta } = gerarExercicio();
+        html += `
+          <div class="exercicio">
+            <p><strong>Exercício ${i + 1}:</strong> ${exercicio}</p>
+            ${usarContagem ? `<div class="countdown" id="countdown-${i}">Tempo: 10</div>` : ''}
+            <div class="revelar-resposta" onclick="mostrarResposta(this, '${resposta}', ${i})">Revelar Resposta</div>
+            <p class="resposta">${resposta}</p>
+          </div>
+        `;
+      }
+
+      document.getElementById('exercicios').innerHTML = html;
+
+      if (usarContagem) {
+        for (let i = 0; i < numeroDeExercicios; i++) {
+          iniciarContagemRegressiva(i);
+        }
+      }
+    }
+
+    function iniciarContagemRegressiva(indice) {
+      let tempo = 10;
+      const countdownElement = document.getElementById(`countdown-${indice}`);
+
+      const interval = setInterval(() => {
+        tempo--;
+        countdownElement.innerText = `Tempo: ${tempo}`;
+        if (tempo <= 0) {
+          clearInterval(interval);
+          mostrarResposta(null, document.querySelectorAll('.resposta')[indice].innerText, indice);
+        }
+      }, 1000);
+    }
+
+    function mostrarResposta(element, resposta, indice) {
+      const respostaElement = document.querySelectorAll('.resposta')[indice];
+      respostaElement.style.display = 'block';
+      if (element) element.style.display = 'none';
+      const countdown = document.getElementById(`countdown-${indice}`);
+      if (countdown) countdown.style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>
